@@ -1,0 +1,37 @@
+1) Найти заданное слово в файле: 
+
+import scala.io.Source
+val filePath = "C:/Spark/file.txt"
+val wordToFind = "man"
+val task1 = Source.fromFile(filePath).mkString
+if(task1.contains(wordToFind)){println("Yes")} else {println("No")}
+
+2) Посчитать количество вхождений заданного слова:
+
+val rdd = spark.sparkContext.textFile(filePath)
+val task2 = rdd.flatMap(line => line.split("\\W+")).filter(_ == wordToFind).count()
+//или можно и найти, и посчитать сразу
+val found = rdd.filter(line => line.contains(wordToFind)).count()
+if (found > 0) { println(s"Слово '$wordToFind' найдено в файле.") } 
+else { println(s"Слово '$wordToFind' не найдено в файле.") }
+
+3) Разбить текст на слова и удалить пустые строки:
+val task3 = rdd.flatMap(line => line.split("\\W+"))
+val withoutEmpty = task3.filter(_.nonEmpty)
+
+4) Создать наборы RDD на основе массивов (целочисленных и
+ассоциативных) и применить к ним reduce и map:
+
+//Целочисленный массив
+val intArrayRDD = sc.parallelize(Array(1,2,3,4,5))
+//Применение reduce для нахождения суммы всех элементов
+val reduceRDD = intArrayRDD.reduce(_+_)
+//Применение map для умножения каждого элемента на 2
+val mapRDD = intArrayRDD.map(_*2)
+
+//Ассоциативный массив
+val associativeArrayRDD = sc.parallelize(Array(("a", 1), ("b", 2), ("c", 3), ("a", 4)))
+//Применение reduceByKey для сложения значений по ключу
+val reduceByKeyRDD = associativeArrayRDD.reduceByKey((x, y) => x + y)
+//Применение mapValues для умножения каждого элемента на 2
+val mapValuesRDD = associativeArrayRDD.mapValues(_*2)
